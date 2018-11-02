@@ -82,11 +82,10 @@ app.get('/signup', function(req, res) {
 });
 
 app.post('/signup', function(req, res) {
-  //grab username from req.body
-  //check to see if user exists
-  const name = req.body.name;
-  const password = crypto.createHmac('sha256', req.body.password);
-  console.log('name check', name, 'password check', req.body.password, password);
+  const name = req.body.username;
+  const hash = crypto.createHash('sha256');
+  const password = hash.update(req.body.password).digest('hex');
+  console.log('name check', name, 'password check', req.body, password);
   new User({ name }).fetch().then(found => {
     if (found) {
       res
@@ -99,9 +98,9 @@ app.post('/signup', function(req, res) {
         name: name,
         password: password
       }).then(function(userCreated) {
-        res.status(200).send('welcome to the fam');
+        res.status(200).send('welcome to the fam 🤝');
       }).catch(error => {
-        console.log('something went wrong when creating a username', error);
+        console.log('something went wrong when creating a username 🤷🏻‍♀️', error);
       });
     }
   });
