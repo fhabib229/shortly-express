@@ -3,13 +3,14 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 
-
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+
+var crypto = require('crypto');
 
 var app = express();
 
@@ -22,7 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
-
 app.get('/', function(req, res) {
   res.render('index');
 });
@@ -32,9 +32,11 @@ app.get('/create', function(req, res) {
 });
 
 app.get('/links', function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
-  });
+  Links.reset()
+    .fetch()
+    .then(function(links) {
+      res.status(200).send(links.models);
+    });
 });
 
 app.post('/links', function(req, res) {
@@ -79,6 +81,37 @@ app.get('/signup', function(req, res) {
   res.render('signup');
 });
 
+app.post('/signup', function(req, res) {
+  //grab username from req.body
+  //check to see if user exists
+  const name = req.body.name;
+  const password = crypto.createHmac('sha256', req.body.password);
+  console.log('name check', name, 'password check', req.body.password, password);
+  new User({ name }).fetch().then(found => {
+    if (found) {
+      res
+        .status()
+        .send(
+          'Sorry fool, you need to be more creative with your username 💅🏼`'
+        );
+    } else {
+      Users.create({
+        name: name,
+        password: password
+      }).then(function(userCreated) {
+        res.status(200).send('welcome to the fam');
+      }).catch(error => {
+        console.log('something went wrong when creating a username', error);
+      });
+    }
+  });
+});
+
+//define new user model
+// send a request to see if the username already exists
+// create statement and insert username and hash password into db
+
+//use request handler function to see if user already exists, to login existing users
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
