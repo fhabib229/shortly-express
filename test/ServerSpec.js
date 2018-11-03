@@ -49,7 +49,7 @@ describe('', function() {
 
     // delete user Svnh from db so it can be created later for the test
     db.knex('users')
-      .where('username', '=', 'Svnh')
+      .where('name', '=', 'Svnh')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -61,7 +61,7 @@ describe('', function() {
 
     // delete user Phillip from db so it can be created later for the test
     db.knex('users')
-      .where('username', '=', 'Phillip')
+      .where('name', '=', 'Phillip')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -76,10 +76,10 @@ describe('', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       // create a user that we can then log-in with
       new User({
-        'username': 'Phillip',
+        'name': 'Phillip',
         'password': 'Phillip'
       }).save().then(function() {
         var options = {
@@ -87,7 +87,7 @@ describe('', function() {
           'followAllRedirects': true,
           'uri': 'http://127.0.0.1:4568/login',
           'json': {
-            'username': 'Phillip',
+            'name': 'Phillip',
             'password': 'Phillip'
           }
         };
@@ -258,17 +258,17 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'username': 'Svnh',
+          'name': 'Svnh',
           'password': 'Svnh'
         }
       };
 
       request(options, function(error, res, body) {
         db.knex('users')
-          .where('username', '=', 'Svnh')
+          .where('name', '=', 'Svnh')
           .then(function(res) {
-            if (res[0] && res[0]['username']) {
-              var user = res[0]['username'];
+            if (res[0] && res[0]['name']) {
+              var user = res[0]['name'];
             }
             expect(user).to.equal('Svnh');
             done();
@@ -286,7 +286,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'username': 'Phillip',
+          'name': 'Phillip',
           'password': 'Phillip'
         }
       };
@@ -305,7 +305,7 @@ describe('', function() {
 
     beforeEach(function(done) {
       new User({
-        'username': 'Phillip',
+        'name': 'Phillip',
         'password': 'Phillip'
       }).save().then(function() {
         done();
@@ -317,7 +317,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
-          'username': 'Phillip',
+          'name': 'Phillip',
           'password': 'Phillip'
         }
       };
@@ -333,7 +333,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
-          'username': 'Fred',
+          'name': 'Fred',
           'password': 'Fred'
         }
       };

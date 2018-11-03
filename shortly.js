@@ -9,7 +9,7 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
-
+var cookieParser = require('cookie-parser');
 var crypto = require('crypto');
 
 var app = express();
@@ -22,24 +22,25 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(cookieParser());
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.render('index');
 });
 
-app.get('/create', function(req, res) {
+app.get('/create', function (req, res) {
   res.render('index');
 });
 
-app.get('/links', function(req, res) {
+app.get('/links', function (req, res) {
   Links.reset()
     .fetch()
-    .then(function(links) {
+    .then(function (links) {
       res.status(200).send(links.models);
     });
 });
 
-app.post('/links', function(req, res) {
+app.post('/links', function (req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
@@ -47,11 +48,11 @@ app.post('/links', function(req, res) {
     return res.sendStatus(404);
   }
 
-  new Link({ url: uri }).fetch().then(function(found) {
+  new Link({ url: uri }).fetch().then(function (found) {
     if (found) {
       res.status(200).send(found.attributes);
     } else {
-      util.getUrlTitle(uri, function(err, title) {
+      util.getUrlTitle(uri, function (err, title) {
         if (err) {
           console.log('Error reading URL heading: ', err);
           return res.sendStatus(404);
@@ -61,7 +62,7 @@ app.post('/links', function(req, res) {
           url: uri,
           title: title,
           baseUrl: req.headers.origin
-        }).then(function(newLink) {
+        }).then(function (newLink) {
           res.status(200).send(newLink);
         });
       });
@@ -73,15 +74,15 @@ app.post('/links', function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
-app.get('/login', function(req, res) {
+app.get('/login', function (req, res) {
   res.render('login');
 });
 
-app.get('/signup', function(req, res) {
+app.get('/signup', function (req, res) {
   res.render('signup');
 });
 
-app.post('/signup', function(req, res) {
+app.post('/signup', function (req, res) {
   const name = req.body.username;
   const hash = crypto.createHash('sha256');
   const password = hash.update(req.body.password).digest('hex');
@@ -89,7 +90,7 @@ app.post('/signup', function(req, res) {
   new User({ name }).fetch().then(found => {
     if (found) {
       res
-        .status()
+        .status(418)
         .send(
           'Sorry fool, you need to be more creative with your username 💅🏼`'
         );
@@ -97,8 +98,8 @@ app.post('/signup', function(req, res) {
       Users.create({
         name: name,
         password: password
-      }).then(function(userCreated) {
-        res.status(200).send('welcome to the fam 🤝');
+      }).then(function (userCreated) {
+        res.status(200).cookie('signup', name).redirect('/').render('index');
       }).catch(error => {
         console.log('something went wrong when creating a username 🤷🏻‍♀️', error);
       });
@@ -106,6 +107,33 @@ app.post('/signup', function(req, res) {
   });
 });
 
+//in a new post
+// get the username from db and compare with username entered in
+// hash the password entered in
+// get the hashed password from db and compare
+// if username and password checks out, give cookie and redirect to main page
+
+app.post('/login', function (req, res) {
+  const name = req.body.username;
+  const hash = crypto.createHash('sha256');
+  const password = hash.update(req.body.password).digest('hex');
+  let matchedUserAndPassword = false;
+  Users.fetch().then(function (userModel) {
+    for (var i = 0; i < userModel.models.length; i++) {
+      if (userModel.models[i].attributes.name === name && userModel.models[i].attributes.password === password) {
+        matchedUserAndPassword = true;
+        break;
+      }
+    }
+    if (matchedUserAndPassword) {
+      console.log('We did it!');
+      res.status(200).cookie('login', name).redirect('/').render('index');
+    } else {
+      console.log('Error Dude!');
+      res.status(400).redirect('/login');
+    }
+  });
+});
 //define new user model
 // send a request to see if the username already exists
 // create statement and insert username and hash password into db
@@ -118,8 +146,8 @@ app.post('/signup', function(req, res) {
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-app.get('/*', function(req, res) {
-  new Link({ code: req.params[0] }).fetch().then(function(link) {
+app.get('/*', function (req, res) {
+  new Link({ code: req.params[0] }).fetch().then(function (link) {
     if (!link) {
       res.redirect('/');
     } else {
@@ -127,9 +155,9 @@ app.get('/*', function(req, res) {
         linkId: link.get('id')
       });
 
-      click.save().then(function() {
+      click.save().then(function () {
         link.set('visits', link.get('visits') + 1);
-        link.save().then(function() {
+        link.save().then(function () {
           return res.redirect(link.get('url'));
         });
       });
