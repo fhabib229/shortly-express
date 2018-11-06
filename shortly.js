@@ -100,14 +100,16 @@ app.post('/signup', function (req, res) {
   const name = req.body.username;
   const hash = crypto.createHash('sha256');
   const password = hash.update(req.body.password).digest('hex');
-  console.log('name check', name, 'password check', req.body, password);
+  console.log('name check', name, 'password check', req.body.password, password);
   new User({ name }).fetch().then(found => {
     if (found) {
+      console.log('Model with this usernamne already exists');
       res
         .status(418)
         .send(
           'Sorry fool, you need to be more creative with your username 💅🏼`'
         );
+
     } else {
       Users.create({
         name: name,

@@ -49,7 +49,7 @@ describe('', function() {
 
     // delete user Svnh from db so it can be created later for the test
     db.knex('users')
-      .where('name', '=', 'Svnh')
+      .where('username', '=', 'Svnh')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -61,7 +61,7 @@ describe('', function() {
 
     // delete user Phillip from db so it can be created later for the test
     db.knex('users')
-      .where('name', '=', 'Phillip')
+      .where('username', '=', 'Phillip')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -79,7 +79,7 @@ describe('', function() {
     beforeEach(function(done) {
       // create a user that we can then log-in with
       new User({
-        'name': 'Phillip',
+        'username': 'Phillip',
         'password': 'Phillip'
       }).save().then(function() {
         var options = {
@@ -87,7 +87,7 @@ describe('', function() {
           'followAllRedirects': true,
           'uri': 'http://127.0.0.1:4568/login',
           'json': {
-            'name': 'Phillip',
+            'username': 'Phillip',
             'password': 'Phillip'
           }
         };
@@ -258,7 +258,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'name': 'Svnh',
+          'username': 'Svnh',
           'password': 'Svnh'
         }
       };
@@ -267,16 +267,17 @@ describe('', function() {
         db.knex('users')
           .where('name', '=', 'Svnh')
           .then(function(res) {
-            if (res[0] && res[0]['name']) {
-              var user = res[0]['name'];
+            if (res[res.length - 1] && res[res.length - 1]['name']) {
+              var user = res[res.length - 1]['name'];
             }
             expect(user).to.equal('Svnh');
             done();
           }).catch(function(err) {
-            throw {
-              type: 'DatabaseError',
-              message: 'Failed to create test setup data'
-            };
+            console.log('DIS DA ERROR', err);
+            // throw {
+            //   type: 'DatabaseError',
+            //   message: 'Failed to create test setup data'
+            // };
           });
       });
     });
@@ -286,7 +287,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'name': 'Phillip',
+          'username': 'Phillip',
           'password': 'Phillip'
         }
       };
@@ -305,7 +306,7 @@ describe('', function() {
 
     beforeEach(function(done) {
       new User({
-        'name': 'Phillip',
+        'username': 'Phillip',
         'password': 'Phillip'
       }).save().then(function() {
         done();
@@ -317,7 +318,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
-          'name': 'Phillip',
+          'username': 'Phillip',
           'password': 'Phillip'
         }
       };
@@ -333,7 +334,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
-          'name': 'Fred',
+          'username': 'Fred',
           'password': 'Fred'
         }
       };
