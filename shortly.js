@@ -42,7 +42,6 @@ app.get('/create', function (req, res) {
 
 app.get('/links', function (req, res) {
   if (req.cookies.signup || req.cookies.login) {
-    res.render('index');
     Links.reset()
       .fetch()
       .then(function (links) {
@@ -115,7 +114,7 @@ app.post('/signup', function (req, res) {
         name: name,
         password: password
       }).then(function (userCreated) {
-        res.status(200).cookie('signup', name).redirect('/');
+        res.status(201).cookie('signup', name).redirect('/');
       }).catch(error => {
         console.log('something went wrong when creating a username 🤷🏻‍♀️', error);
       });
@@ -143,8 +142,8 @@ app.post('/login', function (req, res) {
     }
     if (matchedUserAndPassword) {
       console.log('We did it!');
-      res.status(200).cookie('login', name).redirect('/');
-      console.log('Cookie', req.cookies);
+      res.status(201).cookie('login', name).redirect('/');
+      //console.log('Headers: ', res.headers);
     } else {
       console.log('Error Dude!');
       res.status(400).redirect('/login');

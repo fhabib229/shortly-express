@@ -7,6 +7,7 @@ var Users = require('../app/collections/users');
 var User = require('../app/models/user');
 var Links = require('../app/collections/links');
 var Link = require('../app/models/link');
+var crypto = require('crypto');
 
 /************************************************************/
 // Mocha doesn't have a way to designate pending before blocks.
@@ -49,7 +50,7 @@ describe('', function() {
 
     // delete user Svnh from db so it can be created later for the test
     db.knex('users')
-      .where('username', '=', 'Svnh')
+      .where('name', '=', 'Svnh')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -61,7 +62,7 @@ describe('', function() {
 
     // delete user Phillip from db so it can be created later for the test
     db.knex('users')
-      .where('username', '=', 'Phillip')
+      .where('name', '=', 'Phillip')
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
@@ -72,14 +73,14 @@ describe('', function() {
       });
   });
 
-  xdescribe('Link creation:', function() {
+  describe('Link creation:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
     beforeEach(function(done) {
       // create a user that we can then log-in with
       new User({
-        'username': 'Phillip',
+        'name': 'Phillip',
         'password': 'Phillip'
       }).save().then(function() {
         var options = {
@@ -87,7 +88,7 @@ describe('', function() {
           'followAllRedirects': true,
           'uri': 'http://127.0.0.1:4568/login',
           'json': {
-            'username': 'Phillip',
+            'name': 'Phillip',
             'password': 'Phillip'
           }
         };
@@ -114,7 +115,7 @@ describe('', function() {
       });
     });
 
-    xdescribe('Shortening links:', function() {
+    describe('Shortening links:', function() {
 
       var options = {
         'method': 'POST',
@@ -163,7 +164,7 @@ describe('', function() {
 
     }); // 'Shortening links'
 
-    xdescribe('With previously saved urls:', function() {
+    describe('With previously saved urls:', function() {
 
       var link;
 
@@ -226,7 +227,7 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  xdescribe('Privileged Access:', function() {
+  describe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -258,7 +259,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'username': 'Svnh',
+          'name': 'Svnh',
           'password': 'Svnh'
         }
       };
@@ -287,7 +288,7 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
         'json': {
-          'username': 'Phillip',
+          'name': 'Phillip',
           'password': 'Phillip'
         }
       };
@@ -300,14 +301,17 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
+
 
     var requestWithSession = request.defaults({jar: true});
+    const hash = crypto.createHash('sha256');
+    const password = hash.update('Phillip').digest('hex');
 
     beforeEach(function(done) {
       new User({
-        'username': 'Phillip',
-        'password': 'Phillip'
+        'name': 'Phillip',
+        'password': password
       }).save().then(function() {
         done();
       });
@@ -324,6 +328,7 @@ describe('', function() {
       };
 
       requestWithSession(options, function(error, res, body) {
+        console.log('this is the res', res.headers);
         expect(res.headers.location).to.equal('/');
         done();
       });
@@ -334,12 +339,13 @@ describe('', function() {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
-          'username': 'Fred',
+          'name': 'Fred',
           'password': 'Fred'
         }
       };
 
       requestWithSession(options, function(error, res, body) {
+        // console.log('this is the res', res, res.headers);
         expect(res.headers.location).to.equal('/login');
         done();
       });
@@ -348,3 +354,4 @@ describe('', function() {
   }); // 'Account Login'
 
 });
+
