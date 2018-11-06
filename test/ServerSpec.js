@@ -72,7 +72,7 @@ describe('', function() {
       });
   });
 
-  describe('Link creation:', function() {
+  xdescribe('Link creation:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -114,7 +114,7 @@ describe('', function() {
       });
     });
 
-    describe('Shortening links:', function() {
+    xdescribe('Shortening links:', function() {
 
       var options = {
         'method': 'POST',
@@ -163,7 +163,7 @@ describe('', function() {
 
     }); // 'Shortening links'
 
-    describe('With previously saved urls:', function() {
+    xdescribe('With previously saved urls:', function() {
 
       var link;
 
@@ -226,7 +226,7 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  describe('Privileged Access:', function() {
+  xdescribe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -299,7 +299,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  describe('Account Login:', function() {
+  xdescribe('Account Login:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 

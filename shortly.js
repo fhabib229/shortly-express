@@ -25,19 +25,33 @@ app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 
 app.get('/', function (req, res) {
-  res.render('index');
+  if (req.cookies.signup || req.cookies.login) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/create', function (req, res) {
-  res.render('index');
+  if (req.cookies.signup || req.cookies.login) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/links', function (req, res) {
-  Links.reset()
-    .fetch()
-    .then(function (links) {
-      res.status(200).send(links.models);
-    });
+  if (req.cookies.signup || req.cookies.login) {
+    res.render('index');
+    Links.reset()
+      .fetch()
+      .then(function (links) {
+        res.status(200).send(links.models);
+      });
+  } else {
+    res.redirect('/login');
+  }
+
 });
 
 app.post('/links', function (req, res) {
@@ -99,7 +113,7 @@ app.post('/signup', function (req, res) {
         name: name,
         password: password
       }).then(function (userCreated) {
-        res.status(200).cookie('signup', name).redirect('/').render('index');
+        res.status(200).cookie('signup', name).redirect('/');
       }).catch(error => {
         console.log('something went wrong when creating a username 🤷🏻‍♀️', error);
       });
@@ -127,7 +141,8 @@ app.post('/login', function (req, res) {
     }
     if (matchedUserAndPassword) {
       console.log('We did it!');
-      res.status(200).cookie('login', name).redirect('/').render('index');
+      res.status(200).cookie('login', name).redirect('/');
+      console.log('Cookie', req.cookies);
     } else {
       console.log('Error Dude!');
       res.status(400).redirect('/login');
