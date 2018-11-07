@@ -24,33 +24,32 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 
-app.get('/', function (req, res) {
+let accessToShortly = function(req, res, next) {
   if (req.cookies.signup || req.cookies.login) {
-    res.render('index');
+    next();
   } else {
     res.redirect('/login');
   }
+};
+
+app.get('/logout', (req, res) => {
+  res.clearCookie('login', 'signup').redirect('/login');
 });
 
-app.get('/create', function (req, res) {
-  if (req.cookies.signup || req.cookies.login) {
-    res.render('index');
-  } else {
-    res.redirect('/login');
-  }
+app.get('/', accessToShortly, function (req, res) {
+  res.render('index');
 });
 
-app.get('/links', function (req, res) {
-  if (req.cookies.signup || req.cookies.login) {
-    Links.reset()
-      .fetch()
-      .then(function (links) {
-        res.status(200).send(links.models);
-      });
-  } else {
-    res.redirect('/login');
-  }
+app.get('/create', accessToShortly, function (req, res) {
+  res.render('index');
+});
 
+app.get('/links', accessToShortly, function (req, res) {
+  Links.reset()
+    .fetch()
+    .then(function (links) {
+      res.status(200).send(links.models);
+    });
 });
 
 app.post('/links', function (req, res) {
@@ -143,7 +142,6 @@ app.post('/login', function (req, res) {
     if (matchedUserAndPassword) {
       console.log('We did it!');
       res.status(201).cookie('login', name).redirect('/');
-      //console.log('Headers: ', res.headers);
     } else {
       console.log('Error Dude!');
       res.status(400).redirect('/login');
