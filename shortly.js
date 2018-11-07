@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 
-let accessToShortly = function(req, res, next) {
+const accessToShortly = function(req, res, next) {
   if (req.cookies.signup || req.cookies.login) {
     next();
   } else {
