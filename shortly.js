@@ -121,12 +121,6 @@ app.post('/signup', function (req, res) {
   });
 });
 
-//in a new post
-// get the username from db and compare with username entered in
-// hash the password entered in
-// get the hashed password from db and compare
-// if username and password checks out, give cookie and redirect to main page
-
 app.post('/login', function (req, res) {
   const name = req.body.username;
   const hash = crypto.createHash('sha256');
@@ -148,11 +142,6 @@ app.post('/login', function (req, res) {
     }
   });
 });
-//define new user model
-// send a request to see if the username already exists
-// create statement and insert username and hash password into db
-
-//use request handler function to see if user already exists, to login existing users
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail

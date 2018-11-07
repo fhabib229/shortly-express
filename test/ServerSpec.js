@@ -73,7 +73,7 @@ describe('', function() {
       });
   });
 
-  describe('Link creation:', function() {
+  xdescribe('Link creation:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -115,7 +115,7 @@ describe('', function() {
       });
     });
 
-    describe('Shortening links:', function() {
+    xdescribe('Shortening links:', function() {
 
       var options = {
         'method': 'POST',
@@ -164,7 +164,7 @@ describe('', function() {
 
     }); // 'Shortening links'
 
-    describe('With previously saved urls:', function() {
+    xdescribe('With previously saved urls:', function() {
 
       var link;
 
@@ -227,7 +227,7 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  describe('Privileged Access:', function() {
+  xdescribe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -252,7 +252,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  describe('Account Creation:', function() {
+  xdescribe('Account Creation:', function() {
 
     it('Signup creates a user record', function(done) {
       var options = {
@@ -301,7 +301,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  describe('Account Login:', function() {
+  xdescribe('Account Login:', function() {
 
 
     var requestWithSession = request.defaults({jar: true});
@@ -328,7 +328,6 @@ describe('', function() {
       };
 
       requestWithSession(options, function(error, res, body) {
-        console.log('this is the res', res.headers);
         expect(res.headers.location).to.equal('/');
         done();
       });
@@ -345,7 +344,6 @@ describe('', function() {
       };
 
       requestWithSession(options, function(error, res, body) {
-        // console.log('this is the res', res, res.headers);
         expect(res.headers.location).to.equal('/login');
         done();
       });
@@ -353,5 +351,69 @@ describe('', function() {
 
   }); // 'Account Login'
 
+  xdescribe('Logout User:', function() {
+    it('Logs a user out and redirects them to login page', function(done) {
+      request('http://127.0.0.1:4568/logout', function(error, res, body) {
+        expect(res.req.path).to.equal('/login');
+        done();
+      });
+    });
+  });
+
+  xdescribe('Hash Type for Password: ', function() {
+    it('Should use a sha256 hash for the password hash', function(done) {
+
+      var options = {
+        'method': 'POST',
+        'uri': 'http://127.0.0.1:4568/signup',
+        'json': {
+          'username': 'Patches',
+          'password': 'getGUDscrub'
+        }
+      };
+
+      const hash = crypto.createHash('sha256');
+      const hashedPassword = hash.update('getGUDscrub').digest('hex');
+
+      request(options, function(error, res, body) {
+        db.knex('users')
+          .where('name', '=', 'Patches')
+          .then(function(res) {
+            var password;
+            if (res[res.length - 1] && res[res.length - 1]['password']) {
+              password = res[res.length - 1]['password'];
+            }
+            expect(password).to.equal(hashedPassword);
+            done();
+          }).catch(function(err) {
+            console.log('YOU DIED', err);
+          });
+      });
+    });
+  });
+
+  xdescribe('User Collision: ', function() {
+
+    var options = {
+      'method': 'POST',
+      'uri': 'http://127.0.0.1:4568/signup',
+      'json': {
+        'username': 'Patches',
+        'password': 'getGUDscrub'
+      }
+    };
+
+    it('Should send back a status code of 418 ☕️ if signing with a username that is already taken', function(done) {
+      request(options, function(error, res, body) {
+        expect(res.statusCode).to.equal(418);
+        done();
+      });
+    });
+  });
 });
+
+
+
+//logout, check hash type for passwords, user collision,
+
 
